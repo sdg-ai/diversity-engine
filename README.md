@@ -9,5 +9,5 @@ You will need to set a few environment variable:
 * `SECRET_ACCESS_KEY` (secret key for wasabi storage)
 * `PYTHONPATH=.:src`
 
-For this, put all these variable in a `.env` file, and run:
+For this, put all these variables in a `.env` file, and run:
 `set -o allexport; source .env; set +o allexport`
