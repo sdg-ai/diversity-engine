@@ -11,3 +11,7 @@ You will need to set a few environment variables:
 
 For this, put all these variables in a `.env` file, and run:
 `set -o allexport; source .env; set +o allexport`
+
+### To run the test
+
+`pytest -s --log-level DEBUG src/tests/test_one_scorecard.py`
