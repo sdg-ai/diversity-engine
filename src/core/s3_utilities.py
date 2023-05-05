@@ -136,7 +136,7 @@ def save_dict_to_s3_as_jsonl_file(
     object_path: str = "raw_data/ADM.jsonl.gz"
 ):
     """
-    Takes a Python dictionary, converts it to JSON Lines format, and saves it to a specified location in an S3 bucket
+    Takes a Python dictionary, converts it to JSON Lines format, and saves it to a specified location in a S3 bucket
     """
     # convert dictionary to JSON Lines format
     json_lines = []
