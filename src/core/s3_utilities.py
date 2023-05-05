@@ -1,12 +1,18 @@
 import boto3
 import json
 import gzip
+import os
+
+SERVICE_ENDPOINT = os.getenv(
+    "SERVICE_ENDPOINT", "https://s3.us-west-1.wasabisys.com")
+ACCESS_KEY_ID = os.environ.get("ACCESS_KEY_ID")
+SECRET_ACCESS_KEY = os.environ.get("SECRET_ACCESS_KEY")
 
 
 def list_files_folders(
-    service_endpoint='https://s3.us-west-1.wasabisys.com',
-    access_key_id='N49UDJ36VW2TUT15NXZW',
-    secret_access_key='h0QPDZrzwUReFk7dwfd07fPtbyf5LVXRBgv65gOd',
+    service_endpoint=SERVICE_ENDPOINT,
+    access_key_id=ACCESS_KEY_ID,
+    secret_access_key=SECRET_ACCESS_KEY,
     bucket_name="dei-bucket",
 ):
     """
