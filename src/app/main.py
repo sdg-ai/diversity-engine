@@ -97,9 +97,9 @@ def read_jsonl_file(
 
 def get_all_company_data():
     all_dat = read_jsonl_file(
-        service_endpoint='https://s3.us-west-1.wasabisys.com',
-        access_key_id='N49UDJ36VW2TUT15NXZW',
-        secret_access_key='h0QPDZrzwUReFk7dwfd07fPtbyf5LVXRBgv65gOd',
+        service_endpoint=SERVICE_ENDPOINT,
+        access_key_id=ACCESS_KEY_ID,
+        secret_access_key=SECRET_ACCESS_KEY,
         bucket_name="dei-bucket",
         object_path="company_scores/all/all_companies.jsonl.gz",
         return_lines=True
@@ -121,9 +121,9 @@ def get_all_companies():
     - company id
     """
     all_dat = read_jsonl_file(
-        service_endpoint='https://s3.us-west-1.wasabisys.com',
-        access_key_id='N49UDJ36VW2TUT15NXZW',
-        secret_access_key='h0QPDZrzwUReFk7dwfd07fPtbyf5LVXRBgv65gOd',
+        service_endpoint=SERVICE_ENDPOINT,
+        access_key_id=ACCESS_KEY_ID,
+        secret_access_key=SECRET_ACCESS_KEY,
         bucket_name="dei-bucket",
         object_path="company_scores/all/companies_metadata.jsonl.gz",
         return_lines=True
@@ -136,9 +136,9 @@ def get_all_companies():
 
 def get_one_company_data(company_id: str):
     all_dat = read_jsonl_file(
-        service_endpoint='https://s3.us-west-1.wasabisys.com',
-        access_key_id='N49UDJ36VW2TUT15NXZW',
-        secret_access_key='h0QPDZrzwUReFk7dwfd07fPtbyf5LVXRBgv65gOd',
+        service_endpoint=SERVICE_ENDPOINT,
+        access_key_id=ACCESS_KEY_ID,
+        secret_access_key=SECRET_ACCESS_KEY,
         bucket_name="dei-bucket",
         object_path=f"company_scores/by_company_id/{company_id}.jsonl.gz",
         return_lines=True
@@ -149,6 +149,36 @@ def get_one_company_data(company_id: str):
         for k, item in d_format.items():
             company_dict[k] = item
     return company_dict
+
+
+def get_industry_stats():
+    all_dat = read_jsonl_file(
+        service_endpoint=SERVICE_ENDPOINT,
+        access_key_id=ACCESS_KEY_ID,
+        secret_access_key=SECRET_ACCESS_KEY,
+        bucket_name="dei-bucket",
+        object_path="company_scores/all/industry_statistics.jsonl.gz",
+        return_lines=True
+    )
+    result_dict = {}
+    for d in all_dat:
+        result_dict.update(json.loads(d))
+    return result_dict
+
+
+def get_sector_stats():
+    all_dat = read_jsonl_file(
+        service_endpoint=SERVICE_ENDPOINT,
+        access_key_id=ACCESS_KEY_ID,
+        secret_access_key=SECRET_ACCESS_KEY,
+        bucket_name="dei-bucket",
+        object_path="company_scores/all/sector_statistics.jsonl.gz",
+        return_lines=True
+    )
+    result_dict = {}
+    for d in all_dat:
+        result_dict.update(json.loads(d))
+    return result_dict
 
 
 @router.get("/all_company_data")
@@ -168,6 +198,18 @@ async def get_one_company(
     company_id: str,
 ):
     data = get_one_company_data(company_id=company_id)
+    return data
+
+
+@router.get("/industry_stats")
+async def get_data():
+    data = get_industry_stats()
+    return data
+
+
+@router.get("/sector_stats")
+async def get_data():
+    data = get_sector_stats()
     return data
 
 app.include_router(router, prefix="/api/v1")
