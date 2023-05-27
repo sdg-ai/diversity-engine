@@ -9,6 +9,31 @@ ACCESS_KEY_ID = os.environ.get("ACCESS_KEY_ID")
 SECRET_ACCESS_KEY = os.environ.get("SECRET_ACCESS_KEY")
 
 
+def list_files_in_raw_data_folder(
+    service_endpoint=SERVICE_ENDPOINT,
+    access_key_id=ACCESS_KEY_ID,
+    secret_access_key=SECRET_ACCESS_KEY,
+    bucket_name="dei-bucket",
+    target_folder="raw_data/"
+):
+    """
+    lists all files in the specified folder within a Wasabi bucket
+    """
+    s3 = boto3.client('s3',
+                      aws_access_key_id=access_key_id,
+                      aws_secret_access_key=secret_access_key,
+                      endpoint_url=service_endpoint)
+
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=target_folder)
+
+    files = []
+    for obj in response.get('Contents', []):
+        if not obj['Key'].endswith('/'):  # we don't want to include any subfolders
+            files.append(obj['Key'])
+
+    return files
+
+
 def list_files_folders(
     service_endpoint=SERVICE_ENDPOINT,
     access_key_id=ACCESS_KEY_ID,
@@ -35,6 +60,43 @@ def list_files_folders(
 
     return (files, folders)
 
+
+def read_jsonl_file_old(
+    service_endpoint: str,
+    access_key_id: str,
+    secret_access_key: str,
+    bucket_name: str = "dei-bucket",
+    object_path: str = "raw_data/ADM.jsonl.gz",
+    return_lines: bool = False,
+):
+    """
+    reads the contents of a JSON Lines file stored in a Wasabi bucket
+    """
+    s3 = boto3.client('s3',
+                      aws_access_key_id=access_key_id,
+                      aws_secret_access_key=secret_access_key,
+                      endpoint_url=service_endpoint)
+
+    response = s3.get_object(Bucket=bucket_name, Key=object_path)
+
+    # read the contents of the file
+    file_content = response['Body'].read()
+
+    # decompress the gzipped content
+    file_content = gzip.decompress(file_content)
+
+    # parse the JSON lines
+    json_lines = file_content.decode('utf-8').split('\n')
+    if return_lines:
+        return json_lines
+    else:
+        json_objects = []
+        for line in json_lines:
+            if line:
+                json_objects.append(json.loads(line))
+
+        return json_objects
+    
 
 def read_jsonl_file(
     service_endpoint: str,
