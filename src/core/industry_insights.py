@@ -3,7 +3,7 @@
 import pandas as pd
 import logging
 import json
-from core.s3_utilities import read_jsonl_file
+from core.s3_utilities import read_jsonl_file, save_dict_to_s3_as_jsonl_file
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,10 @@ class IndustryInsights:
 
         # Convert to pandas DataFrame
         df = pd.DataFrame(flattened_data)
+        nb_industries = df["industry"].nunique()
+        nb_sectors = df["sector"].nunique()
+        logger.info(f"Number of distinct industries: {nb_industries}")
+        logger.info(f"Number of distinct sectors: {nb_sectors}")
         return df
     
     def industry_and_sector_comparisons(self, df: pd.DataFrame)->pd.DataFrame:
@@ -131,6 +135,41 @@ class IndustryInsights:
 
         sector_summary = pd.concat([sector_avg, sector_median], axis=1)
         return sector_summary
+    
+    
+    def run_and_save_industry_and_sector_stats(self):
+        df = self.get_data_across_companies()
+        
+        # industry statistics
+        ind_df = self.industry_statistics(companies_df=df)
+        ind_df = ind_df.fillna(0)
+        ind_df[ind_df<0] = 0
+        ind_dict = ind_df.to_dict()
+        logger.info(ind_dict)
+        save_dict_to_s3_as_jsonl_file(
+            data_dict=ind_dict,
+            service_endpoint=self.service_endpoint,
+            access_key_id=self.access_key_id,
+            secret_access_key=self.secret_access_key,
+            bucket_name="dei-bucket",
+            object_path=f"company_scores/all/industry_statistics.jsonl.gz"
+        )
+        logger.info("industry stats saved on wasabi")
+        # sector statistics
+        sec_df = self.sector_statistics(companies_df=df)
+        sec_df = sec_df.fillna(0)
+        sec_df[sec_df<0] = 0
+        sec_dict = sec_df.to_dict()
+        logger.info(sec_dict)
+        save_dict_to_s3_as_jsonl_file(
+            data_dict=sec_dict,
+            service_endpoint=self.service_endpoint,
+            access_key_id=self.access_key_id,
+            secret_access_key=self.secret_access_key,
+            bucket_name="dei-bucket",
+            object_path=f"company_scores/all/sector_statistics.jsonl.gz"
+        )
+        logger.info("sector stats saved on wasabi")
 
 
 def main():
